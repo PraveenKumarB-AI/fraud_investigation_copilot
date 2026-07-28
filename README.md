@@ -22,7 +22,14 @@ An ML and LLM system that scores transactions for fraud risk using a Graph Neura
   | Baseline ("always licit") F1 | 0.0% (93.5% accuracy — misleadingly high, catches zero fraud) |
 
   A follow-up experiment tried standard validation-based early stopping, expecting it to improve on this fixed-epoch result — it did not. Both a loss-selected and an F1-selected checkpoint scored substantially worse on the true test set (27.3% and 40.3% F1) despite one reaching 84.6% F1 on its own validation slice. AUC-PR declined steadily across all three attempts, ruling out a threshold-calibration explanation. The cause: the validation period sits temporally adjacent to training, while the test period is further out, and this dataset has documented temporal drift (Module 2's EDA already showed the labeled illicit rate shifting from 11.6% to 6.5% across that same boundary). The fixed 100-epoch run — never chosen by peeking at any held-out set — is the honest, non-cherry-picked result, and it also happens to be the best one. Full write-up in `models/RESULTS.md`.
-- [ ] **Module 4 — Baseline Model Comparison.** XGBoost/LightGBM on the same features, compared against the GNN.
+- [x] **Module 4 — Baseline Model Comparison.** XGBoost trained on the same 165 features and identical time-based split as the GNN (train: steps 1-27, test: steps 35-49).
+
+  | Model | Precision | Recall | F1 | AUC-PR |
+  |---|---|---|---|---|
+  | GraphSAGE (Module 3) | 74.6% | 57.1% | 64.7% | 62.1% |
+  | **XGBoost (this module)** | **82.5%** | **70.6%** | **76.1%** | **78.4%** |
+
+  XGBoost won decisively on every metric. The explanation: many of the dataset's 165 features are pre-aggregated 1-hop graph-neighborhood summaries built into the data itself, so the "non-graph" baseline was never actually blind to local graph structure — and a small, lightly-tuned 2-layer GraphSAGE didn't realize enough additional benefit from deeper structure to overcome that, especially given the temporal drift documented in Module 3. This matches published academic comparisons on this exact benchmark, where tree-based models have been reported to match or beat GNNs. XGBoost is the model carried forward for transaction scoring in the rest of this project — it's also the practical choice for real-time use, since it scores a transaction from its feature vector alone, with no graph neighborhood required at inference time. Full write-up in `models/RESULTS.md`.
 - [ ] **Module 5 — Streaming Layer.** Kafka/Redpanda in Docker, replaying transactions by time step and scoring them in near real time.
 - [ ] **Module 6 — RAG Layer for Investigation.** A vector store of account history and case notes for flagged transactions.
 - [ ] **Module 7 — LLM Agent Orchestration.** A LangGraph agent that retrieves context, checks account history, and produces a structured verdict.
