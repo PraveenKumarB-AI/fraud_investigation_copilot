@@ -30,7 +30,9 @@ An ML and LLM system that scores transactions for fraud risk using a Graph Neura
   | **XGBoost (this module)** | **82.5%** | **70.6%** | **76.1%** | **78.4%** |
 
   XGBoost won decisively on every metric. The explanation: many of the dataset's 165 features are pre-aggregated 1-hop graph-neighborhood summaries built into the data itself, so the "non-graph" baseline was never actually blind to local graph structure — and a small, lightly-tuned 2-layer GraphSAGE didn't realize enough additional benefit from deeper structure to overcome that, especially given the temporal drift documented in Module 3. This matches published academic comparisons on this exact benchmark, where tree-based models have been reported to match or beat GNNs. XGBoost is the model carried forward for transaction scoring in the rest of this project — it's also the practical choice for real-time use, since it scores a transaction from its feature vector alone, with no graph neighborhood required at inference time. Full write-up in `models/RESULTS.md`.
-- [ ] **Module 5 — Streaming Layer.** Kafka/Redpanda in Docker, replaying transactions by time step and scoring them in near real time.
+- [x] **Module 5 — Streaming Layer.** A single-node Kafka broker (KRaft mode, Docker) with an independent producer and consumer. The producer replays all 203,769 transactions in original time-step order (1-49); the consumer scores each one live with the Module 4 XGBoost model.
+
+  Verified over a full end-to-end run: all 203,769 transactions sent and scored, ~10% flagged for review — consistent with the model's 82.5% precision (some honest false positives are expected at that precision level, given the true illicit rate is ~6.5%).
 - [ ] **Module 6 — RAG Layer for Investigation.** A vector store of account history and case notes for flagged transactions.
 - [ ] **Module 7 — LLM Agent Orchestration.** A LangGraph agent that retrieves context, checks account history, and produces a structured verdict.
 - [ ] **Module 8 — LLMOps: Evaluation & Monitoring.** Langfuse tracing, MLflow experiment tracking, and a labeled evaluation set for verdict accuracy.
