@@ -11,7 +11,17 @@ An ML and LLM system that scores transactions for fraud risk using a Graph Neura
 - [x] **Module 2 — Data & Graph Construction.** Elliptic Bitcoin dataset: 203,769 transactions (nodes), 234,355 payment flows (edges), 165 features per node, 49 time steps. Class balance: 2.2% illicit, 20.6% licit, 77.1% unlabeled — the real, imbalanced shape of fraud data, not an artifact to fix.
 
   Split by time step (train: steps 1-34, test: steps 35-49), matching the honest, no-shuffle evaluation discipline from the stock sentiment project. The labeled illicit rate shifts from 11.6% (train) to 6.5% (test) — a real change in fraud concentration over time, and a good illustration of why a random split would be misleading here.
-- [ ] **Module 3 — GNN Fraud Detection Model.** GraphSAGE/GAT via PyTorch Geometric, trained on a Colab GPU.
+- [x] **Module 3 — GNN Fraud Detection Model.** A 2-layer GraphSAGE (PyTorch Geometric), trained on the full transaction graph on a Colab T4 GPU, evaluated on an honest time-based test split (train: steps 1-27, test: steps 35-49, never overlapping).
+
+  | Metric | Value |
+  |---|---|
+  | Precision (illicit) | 74.6% |
+  | Recall (illicit) | 57.1% |
+  | F1 (illicit) | 64.7% |
+  | AUC-PR | 62.1% |
+  | Baseline ("always licit") F1 | 0.0% (93.5% accuracy — misleadingly high, catches zero fraud) |
+
+  A follow-up experiment tried standard validation-based early stopping, expecting it to improve on this fixed-epoch result — it did not. Both a loss-selected and an F1-selected checkpoint scored substantially worse on the true test set (27.3% and 40.3% F1) despite one reaching 84.6% F1 on its own validation slice. AUC-PR declined steadily across all three attempts, ruling out a threshold-calibration explanation. The cause: the validation period sits temporally adjacent to training, while the test period is further out, and this dataset has documented temporal drift (Module 2's EDA already showed the labeled illicit rate shifting from 11.6% to 6.5% across that same boundary). The fixed 100-epoch run — never chosen by peeking at any held-out set — is the honest, non-cherry-picked result, and it also happens to be the best one. Full write-up in `models/RESULTS.md`.
 - [ ] **Module 4 — Baseline Model Comparison.** XGBoost/LightGBM on the same features, compared against the GNN.
 - [ ] **Module 5 — Streaming Layer.** Kafka/Redpanda in Docker, replaying transactions by time step and scoring them in near real time.
 - [ ] **Module 6 — RAG Layer for Investigation.** A vector store of account history and case notes for flagged transactions.
