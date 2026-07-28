@@ -6,3 +6,4 @@ __pycache__/
 data/
 mlruns/
 *.log
+rag/chroma_store/
