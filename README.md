@@ -33,7 +33,9 @@ An ML and LLM system that scores transactions for fraud risk using a Graph Neura
 - [x] **Module 5 — Streaming Layer.** A single-node Kafka broker (KRaft mode, Docker) with an independent producer and consumer. The producer replays all 203,769 transactions in original time-step order (1-49); the consumer scores each one live with the Module 4 XGBoost model.
 
   Verified over a full end-to-end run: all 203,769 transactions sent and scored, ~10% flagged for review — consistent with the model's 82.5% precision (some honest false positives are expected at that precision level, given the true illicit rate is ~6.5%).
-- [ ] **Module 6 — RAG Layer for Investigation.** A vector store of account history and case notes for flagged transactions.
+- [x] **Module 6 — RAG Layer for Investigation.** Every transaction (203,769) summarized into a plain-English profile (features, time step, graph connectivity), embedded with all-MiniLM-L6-v2, and stored in a persistent ChromaDB index for retrieval by the investigation agent.
+
+  Verified with a retrieval test: querying with a real illicit transaction returned 6/6 nearest neighbors also labeled illicit, spread across four different time steps — suggesting the embeddings capture a genuine, persistent fraud pattern rather than incidental similarity. The index itself (`rag/chroma_store/`) isn't committed -- it's regenerable local data that exceeds GitHub's file size limits, same as the raw/processed data folders. Regenerate with `python -m rag.build_index`.
 - [ ] **Module 7 — LLM Agent Orchestration.** A LangGraph agent that retrieves context, checks account history, and produces a structured verdict.
 - [ ] **Module 8 — LLMOps: Evaluation & Monitoring.** Langfuse tracing, MLflow experiment tracking, and a labeled evaluation set for verdict accuracy.
 - [ ] **Module 9 — Dashboard & API.** A Streamlit interface and a FastAPI backend.
