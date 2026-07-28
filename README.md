@@ -8,7 +8,9 @@ An ML and LLM system that scores transactions for fraud risk using a Graph Neura
 
 ### Core
 - [ ] **Module 1 — Project Setup.** Repo, environment, folder structure.
-- [ ] **Module 2 — Data & Graph Construction.** Elliptic Bitcoin dataset — EDA and graph schema (nodes = transactions, edges = payment flows).
+- [x] **Module 2 — Data & Graph Construction.** Elliptic Bitcoin dataset: 203,769 transactions (nodes), 234,355 payment flows (edges), 165 features per node, 49 time steps. Class balance: 2.2% illicit, 20.6% licit, 77.1% unlabeled — the real, imbalanced shape of fraud data, not an artifact to fix.
+
+  Split by time step (train: steps 1-34, test: steps 35-49), matching the honest, no-shuffle evaluation discipline from the stock sentiment project. The labeled illicit rate shifts from 11.6% (train) to 6.5% (test) — a real change in fraud concentration over time, and a good illustration of why a random split would be misleading here.
 - [ ] **Module 3 — GNN Fraud Detection Model.** GraphSAGE/GAT via PyTorch Geometric, trained on a Colab GPU.
 - [ ] **Module 4 — Baseline Model Comparison.** XGBoost/LightGBM on the same features, compared against the GNN.
 - [ ] **Module 5 — Streaming Layer.** Kafka/Redpanda in Docker, replaying transactions by time step and scoring them in near real time.
