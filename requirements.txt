@@ -4,3 +4,5 @@ python-dotenv
 jupyterlab
 matplotlib
 kagglehub
+xgboost
+scikit-learn
