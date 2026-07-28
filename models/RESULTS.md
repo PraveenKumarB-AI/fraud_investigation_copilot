@@ -85,3 +85,22 @@ GraphSAGE requires the surrounding graph neighborhood at inference time. GraphSA
 remains in the repo as a documented, honestly-evaluated comparison: testing whether
 the added complexity of a graph model was justified is itself part of the engineering
 work here, and the answer was no.
+
+
+## Module 5 -- Real-time streaming layer
+
+A Kafka producer (apache/kafka:3.9.0, KRaft mode, Docker) replays all 203,769
+Elliptic transactions in their original time-step order (1 -> 49). An independent
+consumer scores every transaction the instant it arrives, using the XGBoost model
+saved in Module 4.
+
+Verified end to end over a full run: producer sent all 203,769 transactions across
+49 time steps; consumer scored all of them live, flagging approximately 10% for
+review (about 20,400 transactions).
+
+The ~10% flag rate is higher than the dataset's true ~6.5% illicit rate, and this is
+expected rather than a bug: it directly reflects the model's known 82.5% precision
+from Module 4 -- a meaningful share of flags are honest false positives, the real
+cost of catching 70.6% of actual fraud rather than flagging only the most obvious
+cases. Run: `docker compose up -d`, then `python -m streaming.consumer` and
+`python -m streaming.producer` in separate terminals.

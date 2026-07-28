@@ -6,3 +6,4 @@ matplotlib
 kagglehub
 xgboost
 scikit-learn
+kafka-python-ng
