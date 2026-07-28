@@ -104,3 +104,25 @@ from Module 4 -- a meaningful share of flags are honest false positives, the rea
 cost of catching 70.6% of actual fraud rather than flagging only the most obvious
 cases. Run: `docker compose up -d`, then `python -m streaming.consumer` and
 `python -m streaming.producer` in separate terminals.
+
+
+## Module 6 -- RAG layer for investigation
+
+Every transaction (203,769 total) is summarized into a plain-English profile
+(feature values, time step, graph connectivity) and embedded with
+all-MiniLM-L6-v2, stored in a persistent ChromaDB index. This lets a later
+investigation agent retrieve similar past cases and graph-neighbor context
+for any flagged transaction.
+
+Honest scoping note: the Elliptic dataset is fully anonymized -- there are no
+real account names or case notes to retrieve. Summaries are generated
+programmatically from the actual feature and graph data, not synthetic case
+narratives, and are clearly a demonstration of the retrieval mechanism rather
+than real investigation records.
+
+Verified with a retrieval test: querying with a real illicit transaction as
+the reference case, all 6 nearest neighbors returned were also labeled
+illicit, drawn from time steps 1, 3, 15, and 25 -- spread across the dataset's
+timeline rather than clustered in one batch. This suggests the embeddings are
+capturing a genuine, persistent fraud feature-pattern rather than incidental
+similarity.

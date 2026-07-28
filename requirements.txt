@@ -7,3 +7,5 @@ kagglehub
 xgboost
 scikit-learn
 kafka-python-ng
+chromadb
+sentence-transformers
